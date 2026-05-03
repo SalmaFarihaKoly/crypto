@@ -110,7 +110,16 @@ def solve_ecdh(alpha, beta, p, a, G_point, sample_num):
         print(f"Result: Verified! Shared Secret Key K = {K_alline}\n")
     else:
         print("Result: Failed! Keys do not match.\n")
-
+def ecc_decrypt(C1, C2, private_key, a, p):
+    # ১. nB * C1 বের করা
+    nb_c1 = scalar_multiply(C1, private_key, a, p)
+    
+    # ২. nB * C1 এর নেগেটিভ পয়েন্ট বের করা (x, -y)
+    nb_c1_neg = Point(nb_c1.x, mod(-nb_c1.y, p))
+    
+    # ৩. P_M = C2 + (-nb_c1)
+    recovered_Pm = point_add(C2, nb_c1_neg, a, p)
+    return recovered_Pm
 # ================= Main Program =================
 def main():
     # ==========================================
@@ -187,6 +196,13 @@ def main():
     print(f"   P_C1 = [{kG1}, {P_M_plus_kP_B1}]")
     
     solve_ecdh(7, 5, p, a, G, 1)
+    # ধরো প্রাইভেট কি n_B = 7
+    private_key_B = 7 
+    C1 = kG
+    C2 = P_M_plus_kP_B
+
+    decrypted_point = ecc_decrypt(C1, C2, private_key_B, a, p)
+    print(f"Decrypted Point: {decrypted_point}") # এটি (13, 6) আউটপুট দেবে
     
 
 if __name__ == "__main__":
